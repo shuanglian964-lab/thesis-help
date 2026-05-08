@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DefendAI — Thesis Defense Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <header class="nav">
+    <div class="nav-logo">Defend<span>AI</span></div>
+    <ol class="steps">
+      <li class="step active" data-step="upload">
+        <span class="step-num">01</span>
+        <span class="step-label">Upload</span>
+      </li>
+      <li class="step" data-step="prepare">
+        <span class="step-num">02</span>
+        <span class="step-label">Prepare</span>
+      </li>
+      <li class="step" data-step="defense">
+        <span class="step-num">03</span>
+        <span class="step-label">Defend</span>
+      </li>
+      <li class="step" data-step="results">
+        <span class="step-num">04</span>
+        <span class="step-label">Results</span>
+      </li>
+    </ol>
+  </header>
+
+  <main class="main">
+
+    <!-- ══════════════════════════════════════
+         VIEW 1 · UPLOAD
+    ══════════════════════════════════════ -->
+    <section id="upload-view" class="view active">
+      <div class="hero-text">
+        <h1>Simulate your<br /><em>thesis defense.</em></h1>
+        <p class="sub">Upload your English thesis PDF and practice answering real committee-style questions with live AI feedback.</p>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Click or drag to upload PDF">
+        <div class="drop-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M20 6v20M12 14l8-8 8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 30h28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="drop-label">Drop your PDF here<br /><span>or click to browse</span></p>
+        <input type="file" id="file-input" accept=".pdf" hidden />
+      </div>
+
+      <div id="file-meta" class="file-meta hidden"></div>
+
+      <p id="upload-status" class="status-text"></p>
+
+      <button id="analyze-btn" class="btn btn-primary" disabled>
+        <span>Analyze Paper</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         VIEW 2 · PREPARE
+    ══════════════════════════════════════ -->
+    <section id="prepare-view" class="view">
+      <div class="prepare-header">
+        <div>
+          <h2>Defense Materials</h2>
+          <span id="summary-pill" class="pill"></span>
+        </div>
+        <button id="start-defense-btn" class="btn btn-primary">
+          <span>Start Voice Defense</span>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="prepare-grid">
+        <!-- Questions -->
+        <div class="card">
+          <h3 class="card-title">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 11v-1M8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Expected Questions
+          </h3>
+          <div id="question-list" class="question-list"></div>
+        </div>
+
+        <!-- Script -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3 class="card-title">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Presentation Outline
+            </h3>
+            <div class="card-actions">
+              <button id="copy-script-btn" class="btn btn-ghost btn-sm">Copy</button>
+              <button id="download-script-btn" class="btn btn-ghost btn-sm">Download</button>
+            </div>
+          </div>
+          <pre id="script-box" class="script-box"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         VIEW 3 · DEFENSE
+    ══════════════════════════════════════ -->
+    <section id="defense-view" class="view">
+      <div class="defense-top">
+        <span id="question-counter" class="mono-label"></span>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="defense-grid">
+        <!-- Question panel -->
+        <div class="card question-card">
+          <p class="card-eyebrow">Current Question</p>
+          <p id="current-question" class="question-text"></p>
+          <button id="speak-btn" class="btn btn-ghost btn-sm speak-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6v4l3 2V4L3 6zM9 4.5a4 4 0 0 1 0 7M11 2.5a7 7 0 0 1 0 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Read aloud
+          </button>
+        </div>
+
+        <!-- Answer panel -->
+        <div class="card answer-card">
+          <p class="card-eyebrow">Your Answer</p>
+
+          <div class="record-zone">
+            <button id="record-btn" class="record-btn" aria-label="Hold to speak">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect x="9" y="3" width="10" height="16" rx="5" stroke="currentColor" stroke-width="2"/>
+                <path d="M5 14a9 9 0 0 0 18 0M14 23v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div id="recording-indicator" class="recording-indicator">
+              <span class="rec-dot"></span>
+              <span>Idle</span>
+            </div>
+            <div id="waveform" class="waveform">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <p id="speech-status" class="status-text"></p>
+          <textarea id="answer-box" class="answer-box" placeholder="Your speech will appear here, or type your answer directly..."></textarea>
+          <button id="submit-answer-btn" class="btn btn-primary" disabled>Submit Answer</button>
+        </div>
+
+        <!-- Feedback panel -->
+        <div class="card feedback-card">
+          <p class="card-eyebrow">AI Feedback</p>
+          <div id="evaluation-empty" class="eval-empty">
+            <p>Submit your answer to receive feedback.</p>
+          </div>
+          <div id="evaluation-box" class="evaluation-box hidden">
+            <div class="score-ring">
+              <span id="score-value" class="score-num">—</span>
+              <span class="score-denom">/10</span>
+            </div>
+            <div class="feedback-section">
+              <h4>Strengths</h4>
+              <ul id="strengths-list"></ul>
+            </div>
+            <div class="feedback-section">
+              <h4>Improvements</h4>
+              <ul id="improvements-list"></ul>
+            </div>
+            <p id="overall-feedback" class="overall-feedback"></p>
+          </div>
+          <button id="next-question-btn" class="btn btn-primary mt-auto">Next Question →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         VIEW 4 · RESULTS
+    ══════════════════════════════════════ -->
+    <section id="results-view" class="view">
+      <div class="results-hero">
+        <h2>Defense Complete</h2>
+        <div class="final-score-wrap">
+          <span class="final-score-label">Overall Score</span>
+          <span id="overall-score" class="final-score-num">—</span>
+          <span class="final-score-denom">/ 10</span>
+        </div>
+        <p id="final-feedback" class="final-feedback"></p>
+      </div>
+
+      <div class="results-grid">
+        <div class="card">
+          <h3 class="card-title">Score by Question</h3>
+          <div id="score-chart" class="score-chart"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Question Summary</h3>
+          <div id="results-list" class="results-list"></div>
+        </div>
+      </div>
+
+      <button id="restart-btn" class="btn btn-ghost">← Start Over</button>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/voiceAPI.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
